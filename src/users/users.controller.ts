@@ -13,13 +13,17 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
+  findAll() {    
     return this.usersService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOneById(+id);
+  }
+  @Get('findOneByUserName/:UserName')
+  findOneByUserName(@Param('UserName') UserName: string , @Body() password: string) {
+    return this.usersService.findOneBy(UserName ,password);
   }
 
   @Patch(':id')

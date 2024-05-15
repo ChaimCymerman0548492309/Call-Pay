@@ -1,28 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User } from './entities/users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as winston from 'winston'; 
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    public usersRepository: Repository<User>,
+    
   ) {}
 
   async findAll() {
     try {
       const users = await this.usersRepository.find();
+      
+      this.logger.log(`Users getting successfully ! `, 'UsersService');
+
       return users;
     } catch (error) {
-      logger.error(`An error occurred while getting users: ${error}`); // Log the error
+      this.logger.error(`An error occurred while getting users: ${error}`);
       throw new Error('An error occurred while getting users');
     }
   }
 
-  async findOne(id: number) {
+  async findOneById(id: number) {
     try {
         const user = await this.usersRepository.findOneByOrFail({userId : id});
         if (!user) {
@@ -32,6 +38,18 @@ export class UsersService {
     } catch (error) {
         console.error(error);
         throw new Error(`An error occurred while getting user ${id}`);
+    }
+}
+  async findOneBy(userName: string , password: string) {
+    try {
+        const user = await this.usersRepository.findOneByOrFail({username : userName} && {password : password});
+        if (!user) {
+            throw new Error(`User with id ${userName} not found`);
+        }
+        return user;
+    } catch (error) {
+        console.error(error);
+        throw new Error(`An error occurred while getting user ${userName}`);
     }
 }
 
